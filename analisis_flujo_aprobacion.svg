@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1380" height="980" viewBox="0 0 1380 980" role="img" aria-labelledby="title desc">
+  <title id="title">Flujo de aprobación de egresos</title>
+  <desc id="desc">Diagrama del flujo para llegar a la aprobación de un grupo de egresos.</desc>
+
+  <defs>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#4b5563"/>
+    </marker>
+    <style>
+      .title { font: 700 30px Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 600 16px Arial, sans-serif; fill: #374151; }
+      .box { fill: #ffffff; stroke: #1f2937; stroke-width: 2; rx: 18; }
+      .decision { fill: #fff7ed; stroke: #f97316; stroke-width: 2; rx: 18; }
+      .success { fill: #ecfdf5; stroke: #10b981; stroke-width: 2; rx: 18; }
+      .warning { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; rx: 18; }
+      .text { font: 600 17px Arial, sans-serif; fill: #111827; }
+      .small { font: 600 15px Arial, sans-serif; fill: #374151; }
+      .label { font: 700 13px Arial, sans-serif; fill: #1f2937; }
+      .line { stroke: #4b5563; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+      .thin { stroke: #6b7280; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1380" height="980" fill="#f8fafc"/>
+  <text x="690" y="70" text-anchor="middle" class="title">Flujo de aprobación de egresos</text>
+  <text x="690" y="100" text-anchor="middle" class="subtitle">Hasta llegar a la aprobación del grupo</text>
+
+  <!-- A -->
+  <rect x="80" y="150" width="220" height="90" class="box"/>
+  <text x="190" y="188" text-anchor="middle" class="text">Usuario registra</text>
+  <text x="190" y="212" text-anchor="middle" class="text">o crea egresos</text>
+
+  <line x1="300" y1="195" x2="380" y2="195" class="line"/>
+
+  <!-- B -->
+  <rect x="380" y="150" width="260" height="90" class="box"/>
+  <text x="510" y="188" text-anchor="middle" class="text">Se agrupan en</text>
+  <text x="510" y="212" text-anchor="middle" class="text">almacenamientos_egresos</text>
+
+  <line x1="640" y1="195" x2="720" y2="195" class="line"/>
+
+  <!-- C -->
+  <rect x="720" y="130" width="220" height="130" class="decision"/>
+  <text x="830" y="165" text-anchor="middle" class="text">¿El grupo tiene</text>
+  <text x="830" y="189" text-anchor="middle" class="text">detalles o egresos?</text>
+  <text x="830" y="220" text-anchor="middle" class="small">Sí / No</text>
+
+  <line x1="940" y1="195" x2="1020" y2="195" class="line"/>
+
+  <!-- D -->
+  <rect x="1020" y="130" width="250" height="110" class="success"/>
+  <text x="1145" y="170" text-anchor="middle" class="text">estado_aprobacion</text>
+  <text x="1145" y="195" text-anchor="middle" class="text">= en_aprobacion</text>
+  <text x="1145" y="220" text-anchor="middle" class="small">Grupo pasa a revisión</text>
+
+  <!-- E -->
+  <rect x="760" y="330" width="260" height="90" class="warning"/>
+  <text x="890" y="368" text-anchor="middle" class="text">No aplica / sigue</text>
+  <text x="890" y="392" text-anchor="middle" class="text">pendiente</text>
+
+  <path d="M830 260 L830 330" class="thin"/>
+  <path d="M830 260 L890 330" class="thin"/>
+  <text x="760" y="300" class="label">No</text>
+
+  <!-- F -->
+  <rect x="465" y="455" width="290" height="90" class="box"/>
+  <text x="610" y="490" text-anchor="middle" class="text">Se abre el panel</text>
+  <text x="610" y="515" text-anchor="middle" class="text">de aprobación</text>
+
+  <line x1="610" y1="545" x2="610" y2="610" class="line"/>
+
+  <!-- G -->
+  <rect x="445" y="610" width="330" height="120" class="decision"/>
+  <text x="610" y="645" text-anchor="middle" class="text">¿El usuario está</text>
+  <text x="610" y="670" text-anchor="middle" class="text">configurado como</text>
+  <text x="610" y="695" text-anchor="middle" class="text">aprobador activo?</text>
+
+  <line x1="610" y1="730" x2="610" y2="790" class="line"/>
+
+  <!-- H -->
+  <rect x="130" y="790" width="260" height="90" class="warning"/>
+  <text x="260" y="830" text-anchor="middle" class="text">No autorizado</text>
+  <text x="260" y="855" text-anchor="middle" class="text">Se muestra alerta</text>
+
+  <!-- I -->
+  <rect x="500" y="790" width="320" height="100" class="success"/>
+  <text x="660" y="830" text-anchor="middle" class="text">Usuario ve grupo,</text>
+  <text x="660" y="855" text-anchor="middle" class="text">monto, avance y botón Aprobar</text>
+
+  <path d="M610 730 L610 790" class="line"/>
+  <path d="M445 670 L390 790" class="thin"/>
+  <text x="390" y="750" class="label">No</text>
+
+  <line x1="660" y1="890" x2="660" y2="960" class="line"/>
+
+  <!-- J -->
+  <rect x="500" y="960" width="320" height="120" class="decision"/>
+  <text x="660" y="1000" text-anchor="middle" class="text">¿Ya aprobó</text>
+  <text x="660" y="1025" text-anchor="middle" class="text">ese grupo?</text>
+  <text x="660" y="1050" text-anchor="middle" class="small">Sí / No</text>
+
+  <line x1="500" y1="1020" x2="400" y2="1020" class="line"/>
+
+  <!-- K -->
+  <rect x="80" y="980" width="320" height="90" class="warning"/>
+  <text x="240" y="1018" text-anchor="middle" class="text">Se bloquea la aprobación</text>
+  <text x="240" y="1044" text-anchor="middle" class="text">duplicada</text>
+
+  <path d="M660 1080 L660 1150" class="thin"/>
+  <text x="680" y="1128" class="label">No</text>
+
+  <!-- L/M/N -->
+  <rect x="490" y="1150" width="340" height="120" class="box"/>
+  <text x="660" y="1188" text-anchor="middle" class="text">Se valida el grupo</text>
+  <text x="660" y="1212" text-anchor="middle" class="text">y se identifica si es regular o final</text>
+
+  <line x1="660" y1="1270" x2="660" y2="1345" class="line"/>
+
+  <!-- N/O -->
+  <rect x="470" y="1345" width="380" height="120" class="box"/>
+  <text x="660" y="1382" text-anchor="middle" class="text">Se registra la aprobación en</text>
+  <text x="660" y="1408" text-anchor="middle" class="text">aprobacion_grupos_egresos</text>
+
+  <line x1="660" y1="1465" x2="660" y2="1535" class="line"/>
+
+  <!-- O/P -->
+  <rect x="440" y="1535" width="440" height="120" class="decision"/>
+  <text x="660" y="1575" text-anchor="middle" class="text">¿Se cumplen los requisitos?</text>
+  <text x="660" y="1602" text-anchor="middle" class="text">3 regulares + 1 final</text>
+
+  <!-- Q -->
+  <rect x="120" y="1535" width="260" height="110" class="warning"/>
+  <text x="250" y="1578" text-anchor="middle" class="text">Grupo sigue en</text>
+  <text x="250" y="1602" text-anchor="middle" class="text">en_aprobacion</text>
+
+  <path d="M440 1595 L380 1595" class="thin"/>
+  <text x="396" y="1580" class="label">No</text>
+
+  <line x1="660" y1="1655" x2="660" y2="1735" class="line"/>
+
+  <!-- R/S -->
+  <rect x="500" y="1735" width="320" height="110" class="success"/>
+  <text x="660" y="1778" text-anchor="middle" class="text">UPDATE estado_aprobacion</text>
+  <text x="660" y="1803" text-anchor="middle" class="text">= aprobado</text>
+
+  <line x1="660" y1="1845" x2="660" y2="1915" class="line"/>
+
+  <!-- Final -->
+  <rect x="510" y="1915" width="300" height="90" class="success"/>
+  <text x="660" y="1958" text-anchor="middle" class="text">Grupo aparece como</text>
+  <text x="660" y="1984" text-anchor="middle" class="text">Aprobado</text>
+
+  <!-- Extra note -->
+  <rect x="940" y="1560" width="320" height="150" fill="#e0f2fe" stroke="#0284c7" stroke-width="2" rx="18"/>
+  <text x="1100" y="1596" text-anchor="middle" class="text">Regla aplicada</text>
+  <text x="1100" y="1630" text-anchor="middle" class="small">3 aprobaciones regulares</text>
+  <text x="1100" y="1657" text-anchor="middle" class="small">1 aprobación final</text>
+  <text x="1100" y="1688" text-anchor="middle" class="small">y luego el grupo queda aprobado</text>
+</svg>

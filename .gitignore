@@ -1,0 +1,31 @@
+# Local configuration and secrets
+/config/database.local.php
+/.env
+/.env.*
+!.env.example
+
+# Local diagnostics may expose credentials or database contents
+/debug_usuarios.php
+/find_password.php
+/test_login.php
+/test_mysql.php
+/tools_migrar_autenticacion.php
+/query
+
+# Patient, vendor, and operational documents
+/storage/comprobantes_egresos/*
+!/storage/comprobantes_egresos/.htaccess
+/storage/pdfs/*
+!/storage/pdfs/.gitkeep
+/storage/Firma_Digital/*.exe
+/storage/Firma_Digital/*.msi
+/storage/Firma_Digital/firmas_grupos/*
+!/storage/Firma_Digital/firmas_grupos/.gitkeep
+
+# Local/editor/runtime files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.idea/
+.vscode/

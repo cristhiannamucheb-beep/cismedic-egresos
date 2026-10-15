@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 1680 1180" preserveAspectRatio="xMidYMin meet" role="img" aria-labelledby="title desc">
+  <title id="title">CISMEDIC | Aprobación de egresos con firma DNIe</title>
+  <desc id="desc">Diagrama ejecutivo del almacenamiento del grupo, firmas de todos los aprobadores contables, aprobación gerencial, rechazo y archivo de auditoría.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#52665b"/></marker>
+    <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#b84b45"/></marker>
+    <style>
+      .title{font:700 30px Arial,sans-serif;fill:#183b2d}.subtitle{font:15px Arial,sans-serif;fill:#64756b}
+      .lane{font:700 13px Arial,sans-serif;fill:#617267;letter-spacing:1px}
+      .card{fill:#fff;stroke:#cbd8d0;stroke-width:1.5;rx:10}.card-green{fill:#f1f7f3;stroke:#6e9b7d;stroke-width:1.7;rx:10}
+      .card-blue{fill:#eef5fb;stroke:#7194b3;stroke-width:1.7;rx:10}.card-gold{fill:#fff7e4;stroke:#c39a47;stroke-width:1.7;rx:10}
+      .card-red{fill:#fff1ef;stroke:#ca746c;stroke-width:1.7;rx:10}.card-purple{fill:#f4f0fb;stroke:#9b8cba;stroke-width:1.7;rx:10}
+      .number{fill:#175c41}.number-text{font:700 14px Arial,sans-serif;fill:#fff}.heading{font:700 17px Arial,sans-serif;fill:#203c30}
+      .body{font:15px Arial,sans-serif;fill:#465b4e}.small{font:13px Arial,sans-serif;fill:#64756b}.decision{fill:#fff7e4;stroke:#c39a47;stroke-width:1.7}
+      .flow{fill:none;stroke:#52665b;stroke-width:2.2;marker-end:url(#arrow)}.return{fill:none;stroke:#52665b;stroke-width:2;stroke-dasharray:7 5;marker-end:url(#arrow)}
+      .reject-flow{fill:none;stroke:#b84b45;stroke-width:2.2;marker-end:url(#arrow-red)}.label{font:700 11px Arial,sans-serif;fill:#52665b}
+      .label-red{font:700 11px Arial,sans-serif;fill:#a8433e}.footer{font:11px Arial,sans-serif;fill:#66776d}
+    </style>
+  </defs>
+  <rect width="1680" height="1180" fill="#f4f7f5"/>
+  <rect x="32" y="28" width="1616" height="1124" rx="14" fill="#fff" stroke="#dce5df"/>
+
+  <text x="72" y="78" class="title">CISMEDIC | Flujo de aprobación de egresos</text>
+  <text x="72" y="108" class="subtitle">Aprobación contable secuencial, firma DNIe por responsable y aprobación gerencial final</text>
+  <rect x="1374" y="55" width="218" height="34" rx="17" fill="#f4f0fb" stroke="#cfc4e0"/>
+  <text x="1483" y="77" text-anchor="middle" class="small" style="font-weight:700;fill:#665584">FLUJO OBJETIVO</text>
+  <line x1="72" y1="132" x2="1608" y2="132" stroke="#dce5df"/>
+
+  <text x="72" y="169" class="lane">1 · PREPARACIÓN</text>
+  <text x="536" y="169" class="lane">2 · APROBACIÓN CONTABLE</text>
+  <text x="1090" y="169" class="lane">3 · APROBACIÓN GERENCIAL</text>
+
+  <!-- main horizontal flow -->
+  <rect x="72" y="202" width="270" height="122" class="card-green"/>
+  <circle cx="99" cy="230" r="15" class="number"/><text x="99" y="235" text-anchor="middle" class="number-text">1</text>
+  <text x="123" y="235" class="heading">Agrupar egresos</text>
+  <text x="94" y="270" class="body">Seleccionar egresos pendientes</text>
+  <text x="94" y="292" class="body">y crear el almacenamiento.</text>
+  <text x="94" y="312" class="small">Estado inicial: en aprobación</text>
+
+  <path d="M342 263H382" class="flow"/>
+  <rect x="384" y="202" width="286" height="122" class="card"/>
+  <circle cx="411" cy="230" r="15" class="number"/><text x="411" y="235" text-anchor="middle" class="number-text">2</text>
+  <text x="435" y="235" class="heading">Preparar expediente</text>
+  <text x="406" y="270" class="body">Resumen, detalle e importes</text>
+  <text x="406" y="292" class="body">+ comprobantes PDF e imágenes</text>
+  <text x="406" y="312" class="small">Fijar versión/huella del documento</text>
+
+  <path d="M670 263H710" class="flow"/>
+  <rect x="712" y="202" width="286" height="122" class="card-blue"/>
+  <circle cx="739" cy="230" r="15" class="number"/><text x="739" y="235" text-anchor="middle" class="number-text">3</text>
+  <text x="763" y="235" class="heading">Revisión contable</text>
+  <text x="734" y="270" class="body">Cada preaprobador revisa</text>
+  <text x="734" y="292" class="body">y firma con su propio DNIe.</text>
+  <text x="734" y="312" class="small">Validar firma antes de contar el voto</text>
+
+  <path d="M998 263H1038" class="flow"/>
+  <polygon points="1128,192 1218,263 1128,334 1038,263" class="decision"/>
+  <text x="1128" y="251" text-anchor="middle" class="heading">¿Firmaron</text>
+  <text x="1128" y="272" text-anchor="middle" class="heading">todos?</text>
+  <text x="1128" y="294" text-anchor="middle" class="small">Contables activos</text>
+
+  <path d="M1218 263H1260" class="flow"/>
+  <text x="1235" y="249" class="label">Sí</text>
+  <rect x="1262" y="202" width="286" height="122" class="card-green"/>
+  <circle cx="1289" cy="230" r="15" class="number"/><text x="1289" y="235" text-anchor="middle" class="number-text">4</text>
+  <text x="1313" y="235" class="heading">Firma gerencial</text>
+  <text x="1284" y="270" class="body">El gerente revisa y firma</text>
+  <text x="1284" y="292" class="body">con su DNIe el mismo expediente.</text>
+  <text x="1284" y="312" class="small">Etapa bloqueada hasta completar 3</text>
+
+  <path d="M1405 324V378" class="flow"/>
+  <polygon points="1405,378 1495,440 1405,502 1315,440" class="decision"/>
+  <text x="1405" y="435" text-anchor="middle" class="heading">¿Firma</text>
+  <text x="1405" y="456" text-anchor="middle" class="heading">válida?</text>
+  <text x="1405" y="477" text-anchor="middle" class="small">PDF íntegro</text>
+
+  <path d="M1405 502V553" class="flow"/>
+  <text x="1420" y="532" class="label">Sí</text>
+  <rect x="1262" y="555" width="286" height="116" class="card-green"/>
+  <circle cx="1289" cy="583" r="15" class="number"/><text x="1289" y="588" text-anchor="middle" class="number-text">5</text>
+  <text x="1313" y="588" class="heading">Grupo aprobado</text>
+  <text x="1284" y="623" class="body">Guardar PDF firmado, firmas,</text>
+  <text x="1284" y="645" class="body">certificados, fechas y huellas.</text>
+  <text x="1284" y="663" class="small">Acta disponible para auditoría</text>
+
+  <!-- regular stage incomplete loop -->
+  <path d="M1128 334V386H855V430" class="flow"/>
+  <text x="1085" y="376" class="label">No</text>
+  <rect x="712" y="432" width="286" height="115" class="card-blue"/>
+  <text x="855" y="466" text-anchor="middle" class="heading">Esperar siguiente firma</text>
+  <text x="855" y="493" text-anchor="middle" class="body">Registrar firma contable válida</text>
+  <text x="855" y="516" text-anchor="middle" class="body">y actualizar avance del grupo.</text>
+  <path d="M712 489H684V263H712" class="return"/>
+
+  <!-- rejection path -->
+  <path d="M855 324V570H1070V710H998" class="reject-flow"/>
+  <text x="878" y="563" class="label-red">Cualquier preaprobador rechaza</text>
+  <path d="M1315 440H1238V710H998" class="reject-flow"/>
+  <text x="1248" y="423" class="label-red">Rechazo / firma inválida</text>
+  <rect x="384" y="650" width="614" height="122" class="card-red"/>
+  <circle cx="412" cy="679" r="15" fill="#a8433e"/><text x="412" y="684" text-anchor="middle" class="number-text">!</text>
+  <text x="438" y="684" class="heading">Archivar rechazo y devolver a reagrupación</text>
+  <text x="408" y="719" class="body">Conservar grupo, egresos, votos, firmas previas, usuario, fecha y motivo.</text>
+  <text x="408" y="744" class="body">Liberar egresos para crear una nueva agrupación y nueva revisión.</text>
+  <path d="M384 710H210V324" class="reject-flow"/>
+  <text x="220" y="692" class="label-red">Reagrupar desde el inicio</text>
+
+  <!-- signature details and integration gate -->
+  <rect x="72" y="835" width="730" height="225" class="card-blue"/>
+  <text x="102" y="874" class="heading">Firma digital contable y gerencial</text>
+  <line x1="102" y1="891" x2="770" y2="891" stroke="#cedce7"/>
+  <text x="102" y="924" class="body">• Cada firma debe corresponder exactamente a la versión aprobada del expediente.</text>
+  <text x="102" y="954" class="body">• Usar firma PDF PAdES; validar integridad, certificado y fecha.</text>
+  <text x="102" y="984" class="body">• Guardar PDF original, PDF firmado, identidad verificada y SHA-256.</text>
+  <text x="102" y="1014" class="body">• El PIN y la clave privada permanecen en el DNIe/equipo del firmante.</text>
+  <text x="102" y="1040" class="small">Nunca registrar PIN, copiar llaves privadas ni sustituir la firma por una imagen.</text>
+
+  <rect x="846" y="835" width="702" height="225" class="card-purple"/>
+  <text x="876" y="874" class="heading">Requisito para activar el flujo automatizado</text>
+  <line x1="876" y1="891" x2="1518" y2="891" stroke="#d8d0e6"/>
+  <text x="876" y="924" class="body">La conexión del botón Aprobar con DNIe está pendiente de integración institucional.</text>
+  <text x="876" y="954" class="body">Se requiere acceso y especificación del Firmador autorizado para CISMEDIC.</text>
+  <text x="876" y="984" class="body">La prueba manual actual de Firma Perú no registra aprobaciones reales en el sistema.</text>
+  <text x="876" y="1014" class="body">No pasar a producción hasta validar PAdES y la verificación criptográfica completa.</text>
+  <text x="876" y="1040" class="small">Morado = requisito pendiente; azul = etapa prevista de firma DNIe.</text>
+
+  <text x="72" y="1110" class="footer">Resultado esperado: aprobación contable unánime con firmas DNIe → firma gerencial → grupo APROBADO y acta verificable.</text>
+</svg>
