@@ -46,3 +46,26 @@ Firma Perú indica que para Windows requiere los certificados DNIe instalados y 
 La integración solo debe avanzar después de que la prueba produzca un PDF PAdES aceptado por el Validador oficial en cada estación. Para el flujo de grupo, CISMEDIC deberá generar un PDF inmutable por grupo, pedir la firma local de cada aprobador con el DNIe, recibir el PDF firmado, validar la firma y el certificado, y conservar el original, los PDF firmados, las identidades verificadas, la fecha y las huellas SHA-256. Una aprobación de sesión o una imagen de firma no reemplaza estos controles.
 
 El MSI IDPlug es middleware local de DNIe: no firma PDFs y no recibe órdenes HTTP desde la aplicación web. El Firmador ciudadano también se ejecuta en el equipo del aprobador y el portal oficial documenta firma manual de archivos. Para invocar la firma desde el propio botón **Aprobar grupo** se debe solicitar a PCM acceso al componente institucional **Firmador**, con credenciales para el sistema CISMEDIC y la URL de integración: <https://www.gob.pe/22273>. No se deben reutilizar credenciales de otra entidad. Hasta contar con ese acceso y su documentación técnica, el botón de aprobación seguirá siendo el flujo actual y la firma del PDF de prueba es una comprobación separada.
+
+## Aprobación de grupos con firma DNIe (implementado)
+
+Ahora toda aprobación (regular y final) exige un PDF firmado y validado en el servidor:
+
+1. En **Aprobación**, el aprobador pulsa **Descargar expediente para firmar**. La primera descarga genera el expediente del grupo (acta y comprobantes anexos) y guarda su SHA-256 en `expedientes_firma_grupos`. Las descargas siguientes entregan exactamente el mismo archivo.
+2. El aprobador firma ese PDF en su PC con Firma Perú y su DNIe, sin editarlo.
+3. Sube el PDF firmado y pulsa **Validar firma y aprobar**. El servidor (`config/firma_digital.php`) comprueba que:
+   - el PDF firmado contiene byte por byte el expediente original (se descarta cualquier otro PDF o un expediente editado);
+   - la firma CMS/PAdES es criptográficamente correcta sobre todo el rango firmado;
+   - el certificado está vigente, sirve para firmar y encadena a una CA de `storage/firma_digital/ca`;
+   - el DNI del certificado coincide con el DNI del usuario (lo registra el superadmin en **Panel de seguridad**).
+4. Solo si todo es válido se registra el voto en `aprobacion_grupos_egresos`. Además se guarda la evidencia en `firmas_grupos_egresos` (firmante, DNI, emisor, serie y vigencia del certificado, SHA-256 del original y del firmado), y el PDF firmado en `storage/firma_digital/firmados`.
+5. El acta (`aprobacion_pdf.php`) muestra para cada voto «Firma DNIe verificada: nombre - DNI».
+
+Si los egresos del grupo cambian después de que alguien firmó, el sistema bloquea la aprobación: un superadmin tiene que revertir el grupo para que se genere un expediente nuevo.
+
+### Pendiente antes de producción
+
+- Cargar en `storage/firma_digital/ca` los certificados públicos de la cadena del DNIe (ver `LEEME.md`) y probar con un DNIe real y Firma Perú.
+- Registrar el DNI de cada aprobador.
+- Consultar revocación del certificado (OCSP/CRL de RENIEC). Hoy se valida la vigencia por fechas, pero no si el certificado fue revocado.
+- La fecha de firma que se registra es la de la verificación en el servidor; no se lee todavía el sello de tiempo del PDF.

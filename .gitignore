@@ -29,3 +29,8 @@ Thumbs.db
 *.tmp
 .idea/
 .vscode/
+/database/*.local.txt
+/storage/firma_digital/expedientes/
+/storage/firma_digital/firmados/
+/storage/firma_digital/prueba/
+/storage/firma_digital/ca/PRUEBA_*
