@@ -12,8 +12,10 @@ if (!isset($_SESSION['usuario_id'])) {
 requerir_roles(['superadmin', 'administrativo', 'caja']);
 require_once 'config/database.php';
 require_once 'config/aprobaciones.php';
+require_once 'config/firma_digital.php';
 
 inicializar_tablas_aprobacion($pdo);
+inicializar_tablas_firma($pdo);
 
 $pdo->exec("UPDATE almacenamientos_egresos
     SET estado_aprobacion = 'en_aprobacion'
@@ -148,6 +150,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['accion'] ?? ''), 
                 rechazar_y_archivar_grupo($pdo, $idGrupo, $idUsuarioActual, $esFinal === 1 ? 'final' : 'regular', $motivoRechazo);
                 $mensaje = 'Grupo rechazado y archivado. Sus egresos quedaron disponibles para una nueva agrupación. El rechazo se notificará a los aprobadores.';
             } else {
+                // La aprobación solo se registra si el PDF firmado con DNIe se valida en el servidor.
+                $firma = registrar_firma_grupo($pdo, $idGrupo, $idUsuarioActual, $esFinal, $_FILES['pdf_firmado'] ?? []);
                 $stmt = $pdo->prepare('INSERT INTO aprobacion_grupos_egresos (id_almacenamiento, id_usuario, es_final) VALUES (?, ?, ?)');
                 $stmt->execute([$idGrupo, $idUsuarioActual, $esFinal]);
                 $regulares += $esFinal === 0 ? 1 : 0;
@@ -160,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && in_array(($_POST['accion'] ?? ''), 
                 } else {
                     $mensaje = 'Aprobación final registrada. El grupo quedó aprobado.';
                 }
+                $mensaje .= ' Firma DNIe verificada: ' . $firma['nombre'] . ' (DNI ' . $firma['dni'] . ').';
             }
 
             $pdo->commit();
@@ -757,13 +762,17 @@ try {
                                                         <i class="bi bi-check-circle-fill me-2"></i>Aprobación completa
                                                     </div>
                                                     <?php elseif ($puedeDecidirEtapa): ?>
-                                                    <form method="POST" onsubmit="return confirm('¿Confirmas aprobar este grupo de egresos?');">
+                                                    <div class="small text-muted mb-2"><i class="bi bi-pen me-1"></i>Para aprobar: 1) descarga el expediente, 2) fírmalo con tu DNIe en Firma Perú sin modificarlo, 3) sube aquí el PDF firmado.</div>
+                                                    <a class="btn btn-outline-success w-100 mb-2" href="expediente_firma.php?id=<?= (int) $grupo['id'] ?>"><i class="bi bi-file-earmark-arrow-down me-1"></i>Descargar expediente para firmar</a>
+                                                    <form method="POST" enctype="multipart/form-data" onsubmit="return confirm('¿Confirmas aprobar este grupo con el PDF firmado?');">
                                                         <input type="hidden" name="accion" value="aprobar_grupo">
+                                                        <label class="form-label small text-muted mb-1" for="pdf-firmado-<?= (int) $grupo['id'] ?>">PDF firmado con DNIe</label>
+                                                        <input class="form-control form-control-sm mb-2" type="file" id="pdf-firmado-<?= (int) $grupo['id'] ?>" name="pdf_firmado" accept="application/pdf,.pdf" required>
                                                         <input type="hidden" name="id_grupo" value="<?= (int) $grupo['id'] ?>">
                                                         <input type="hidden" name="ano" value="<?= (int) $anoSeleccionado ?>">
                                                         <input type="hidden" name="mes" value="<?= (int) $mesSeleccionado ?>">
                                                         <button class="btn btn-success w-100" type="submit">
-                                                            <i class="bi bi-check2-circle me-1"></i>Aprobar grupo
+                                                            <i class="bi bi-shield-check me-1"></i>Validar firma y aprobar
                                                         </button>
                                                     </form>
                                                     <form method="POST" class="mt-2" onsubmit="return confirm('¿Rechazar el grupo? Se archivará para auditoría y sus egresos quedarán disponibles para una nueva agrupación.');">

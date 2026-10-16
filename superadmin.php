@@ -6,8 +6,10 @@ iniciar_sesion_segura();
 requerir_superadmin();
 require_once __DIR__ . '/config/database.php';
 require_once __DIR__ . '/config/aprobaciones.php';
+require_once __DIR__ . '/config/firma_digital.php';
 
 inicializar_tablas_aprobacion($pdo);
+inicializar_tablas_firma($pdo);
 
 $mensaje = '';
 $error = '';
@@ -34,8 +36,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $mensaje = 'Usuario creado correctamente.';
         } elseif ($accion === 'actualizar_usuario') {
             $id = (int) ($_POST['id'] ?? 0);
-            $nombre = trim($_POST['nombre'] ?? '');
-            $correo = trim($_POST['correo'] ?? '');
+            // El formulario de permisos no envía nombre ni correo: se conservan los actuales.
+            $stmt = $pdo->prepare('SELECT nombre, correo FROM usuarios WHERE id = ?');
+            $stmt->execute([$id]);
+            $usuarioActual = $stmt->fetch() ?: ['nombre' => '', 'correo' => ''];
+            $nombre = trim($_POST['nombre'] ?? $usuarioActual['nombre']);
+            $correo = trim($_POST['correo'] ?? $usuarioActual['correo']);
             $rol = $_POST['rol'] ?? '';
             $activo = isset($_POST['activo']) ? 1 : 0;
             $contrasena = $_POST['contrasena'] ?? '';
@@ -72,6 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->execute([$nombre, $correo, $rol, $activo, $id]);
             }
             $mensaje = 'Permisos del usuario actualizados correctamente.';
+        } elseif ($accion === 'actualizar_dni') {
+            $id = (int) ($_POST['id'] ?? 0);
+            $dni = trim((string) ($_POST['dni'] ?? ''));
+            if ($id <= 0 || ($dni !== '' && !preg_match('/^\d{8}$/', $dni))) {
+                throw new Exception('El DNI debe tener 8 dígitos.');
+            }
+            $pdo->prepare('UPDATE usuarios SET dni = ? WHERE id = ?')->execute([$dni === '' ? null : $dni, $id]);
+            $mensaje = 'DNI actualizado. Se usará para validar la firma digital del usuario.';
         } elseif ($accion === 'actualizar_aprobadores') {
             $aprobadoresRegulares = array_values(array_filter(array_map('intval', $_POST['aprobadores'] ?? []), static fn($id) => $id > 0));
             $aprobadoresFinales = array_values(array_filter(array_map('intval', $_POST['aprobadores_finales'] ?? []), static fn($id) => $id > 0));
@@ -188,7 +202,7 @@ $patron_entrega = '%' . $busqueda_entrega . '%';
 $stmt = $pdo->prepare("SELECT ed.id_entrega, ed.tipo_comprobante, ed.nComprobante, ed.fecha_entrega, ed.monto, CONCAT(COALESCE(pc.nombre, ''), ' ', COALESCE(pc.apellido, '')) AS personal FROM entregas_dinero ed LEFT JOIN personal_clinica pc ON pc.id_personal = ed.id_personal WHERE (? = '' OR CAST(ed.id_entrega AS CHAR) LIKE ? OR ed.nComprobante LIKE ? OR CONCAT(pc.nombre, ' ', pc.apellido) LIKE ?) ORDER BY ed.fecha_entrega DESC, ed.id_entrega DESC LIMIT 100");
 $stmt->execute([$busqueda_entrega, $patron_entrega, $patron_entrega, $patron_entrega]);
 $entregas_personal = $stmt->fetchAll();
-$usuarios = $pdo->query('SELECT id, nombre, correo, rol, activo, debe_cambiar_contrasena, intentos_fallidos, bloqueado_hasta, ultimo_acceso FROM usuarios ORDER BY nombre')->fetchAll();
+$usuarios = $pdo->query('SELECT id, nombre, correo, dni, rol, activo, debe_cambiar_contrasena, intentos_fallidos, bloqueado_hasta, ultimo_acceso FROM usuarios ORDER BY nombre')->fetchAll();
 $aprobadores = $pdo->query('SELECT id_usuario FROM aprobadores_egresos WHERE activo = 1 AND es_final = 0')->fetchAll(PDO::FETCH_COLUMN, 0);
 $aprobadores = array_map('intval', $aprobadores);
 $aprobadores_finales = $pdo->query('SELECT id_usuario FROM aprobadores_egresos WHERE activo = 1 AND es_final = 1')->fetchAll(PDO::FETCH_COLUMN, 0);
@@ -259,5 +273,5 @@ $grupos_aprobacion = $pdo->query("SELECT id, nombre, total, estado_aprobacion FR
 </div>
 
 <div class="card shadow-sm mb-4"><div class="card-header bg-white"><h5 class="mb-0"><i class="bi bi-person-plus me-2 text-success"></i>Crear usuario</h5></div><div class="card-body"><form method="POST" class="row g-3"><input type="hidden" name="accion" value="crear_usuario"><div class="col-md-3"><label class="form-label">Nombre</label><input class="form-control" name="nombre" required></div><div class="col-md-3"><label class="form-label">Correo</label><input class="form-control" type="email" name="correo" required></div><div class="col-md-2"><label class="form-label">Rol</label><select class="form-select" name="rol" required><?php foreach ($roles as $rol): ?><option value="<?= $rol ?>"><?= ucfirst($rol) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><label class="form-label">Contraseña inicial</label><input class="form-control" type="password" name="contrasena" minlength="10" required></div><div class="col-md-1 d-flex align-items-end"><button class="btn btn-success w-100" title="Crear usuario"><i class="bi bi-plus-lg"></i></button></div></form></div></div>
-<div class="row g-3"><?php foreach ($usuarios as $usuario): $usuario_id = (int) $usuario['id']; $es_aprobador_regular = in_array($usuario_id, $aprobadores, true); $es_aprobador_final = in_array($usuario_id, $aprobadores_finales, true); ?><div class="col-xl-6"><div class="user-card bg-white p-3 h-100"><div class="d-flex justify-content-between align-items-start gap-3"><div><h6 class="mb-1"><?= escapar($usuario['nombre']) ?></h6><div class="small text-muted"><?= escapar($usuario['correo']) ?></div></div><span class="badge <?= $usuario['rol'] === 'superadmin' ? 'bg-dark' : ($usuario['rol'] === 'administrativo' ? 'bg-primary' : 'bg-warning text-dark') ?> role-badge"><?= escapar($usuario['rol']) ?></span></div><hr><form method="POST" class="row g-2 align-items-end"><input type="hidden" name="accion" value="actualizar_usuario"><input type="hidden" name="id" value="<?= (int) $usuario['id'] ?>"><div class="col-sm-4"><label class="form-label small">Rol</label><select class="form-select form-select-sm" name="rol"><?php foreach ($roles as $rol): ?><option value="<?= $rol ?>" <?= $usuario['rol'] === $rol ? 'selected' : '' ?>><?= ucfirst($rol) ?></option><?php endforeach; ?></select></div><div class="col-sm-3"><label class="form-label small">Nueva contraseña</label><input class="form-control form-control-sm" type="password" name="contrasena" minlength="10" placeholder="Opcional"></div><div class="col-sm-2"><div class="form-check"><input class="form-check-input" type="checkbox" name="activo" id="activo<?= (int) $usuario['id'] ?>" <?= $usuario['activo'] ? 'checked' : '' ?>><label class="form-check-label small" for="activo<?= (int) $usuario['id'] ?>">Activo</label></div></div><div class="col-sm-3"><button class="btn btn-outline-primary btn-sm w-100" type="submit"><i class="bi bi-save me-1"></i>Guardar permisos</button></div></form><div class="small text-muted mt-3"><i class="bi bi-clock me-1"></i>Último acceso: <?= $usuario['ultimo_acceso'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_acceso'])) : 'Nunca' ?><?php if ($usuario['debe_cambiar_contrasena']): ?> · Cambio de contraseña pendiente<?php endif; ?><?php if ($usuario['bloqueado_hasta'] && strtotime($usuario['bloqueado_hasta']) > time()): ?> · Cuenta bloqueada<?php endif; ?></div></div></div><?php endforeach; ?></div>
+<div class="row g-3"><?php foreach ($usuarios as $usuario): $usuario_id = (int) $usuario['id']; $es_aprobador_regular = in_array($usuario_id, $aprobadores, true); $es_aprobador_final = in_array($usuario_id, $aprobadores_finales, true); ?><div class="col-xl-6"><div class="user-card bg-white p-3 h-100"><div class="d-flex justify-content-between align-items-start gap-3"><div><h6 class="mb-1"><?= escapar($usuario['nombre']) ?></h6><div class="small text-muted"><?= escapar($usuario['correo']) ?></div></div><span class="badge <?= $usuario['rol'] === 'superadmin' ? 'bg-dark' : ($usuario['rol'] === 'administrativo' ? 'bg-primary' : 'bg-warning text-dark') ?> role-badge"><?= escapar($usuario['rol']) ?></span></div><hr><form method="POST" class="row g-2 align-items-end"><input type="hidden" name="accion" value="actualizar_usuario"><input type="hidden" name="id" value="<?= (int) $usuario['id'] ?>"><div class="col-sm-4"><label class="form-label small">Rol</label><select class="form-select form-select-sm" name="rol"><?php foreach ($roles as $rol): ?><option value="<?= $rol ?>" <?= $usuario['rol'] === $rol ? 'selected' : '' ?>><?= ucfirst($rol) ?></option><?php endforeach; ?></select></div><div class="col-sm-3"><label class="form-label small">Nueva contraseña</label><input class="form-control form-control-sm" type="password" name="contrasena" minlength="10" placeholder="Opcional"></div><div class="col-sm-2"><div class="form-check"><input class="form-check-input" type="checkbox" name="activo" id="activo<?= (int) $usuario['id'] ?>" <?= $usuario['activo'] ? 'checked' : '' ?>><label class="form-check-label small" for="activo<?= (int) $usuario['id'] ?>">Activo</label></div></div><div class="col-sm-3"><button class="btn btn-outline-primary btn-sm w-100" type="submit"><i class="bi bi-save me-1"></i>Guardar permisos</button></div></form><form method="POST" class="row g-2 align-items-end mt-1"><input type="hidden" name="accion" value="actualizar_dni"><input type="hidden" name="id" value="<?= (int) $usuario['id'] ?>"><div class="col-sm-9"><label class="form-label small" for="dni<?= (int) $usuario['id'] ?>">DNI para firma digital</label><input class="form-control form-control-sm" id="dni<?= (int) $usuario['id'] ?>" name="dni" value="<?= escapar((string) ($usuario['dni'] ?? '')) ?>" inputmode="numeric" pattern="\d{8}" maxlength="8" placeholder="8 dígitos"></div><div class="col-sm-3"><button class="btn btn-outline-secondary btn-sm w-100" type="submit"><i class="bi bi-person-vcard me-1"></i>Guardar DNI</button></div></form><div class="small text-muted mt-3"><i class="bi bi-clock me-1"></i>Último acceso: <?= $usuario['ultimo_acceso'] ? date('d/m/Y H:i', strtotime($usuario['ultimo_acceso'])) : 'Nunca' ?><?php if ($usuario['debe_cambiar_contrasena']): ?> · Cambio de contraseña pendiente<?php endif; ?><?php if ($usuario['bloqueado_hasta'] && strtotime($usuario['bloqueado_hasta']) > time()): ?> · Cuenta bloqueada<?php endif; ?></div></div></div><?php endforeach; ?></div>
 </div></main></div><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script><script src="assets/js/main.js?v=20260820-2"></script></body></html>
